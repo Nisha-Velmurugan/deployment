@@ -21,7 +21,7 @@ pipeline {
 
         stage('Run Unit Tests') {
             steps {
-                sh 'docker run --rm $IMAGE_NAME:latest pytest tests/'
+                sh 'docker run --rm -e PYTHONPATH=/app -w /app nisshaa/deployment:latest pytest tests/'
             }
         }
 
