@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Nisha-Velmurugan/deployment.git'
+                git branch: 'main', url: 'https://github.com/Nisha-Velmurugan/deployment.git'
             }
         }
 
@@ -20,15 +20,17 @@ pipeline {
 
         stage('Run Unit Tests') {
             steps {
-                sh 'docker run --rm $IMAGE_NAME pytest'
+                sh 'docker run --rm $IMAGE_NAME pytest || exit 1'
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
-                    sh 'docker push $IMAGE_NAME'
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login --username "$DOCKER_USER" --password-stdin
+                        docker push $IMAGE_NAME
+                    '''
                 }
             }
         }
@@ -40,7 +42,7 @@ pipeline {
                         sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no nishavelmurugan7@100.115.92.202 << 'EOF'
                         docker pull $IMAGE_NAME
                         docker stop flask-app || true
-                        docker rm flask-app || true
+                        docker rm -f flask-app || true
                         docker run -d --name flask-app -p 5000:5000 $IMAGE_NAME
                         EOF
                     '''
