@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/Nisha-Velmurugan/deployment.git', branch: 'main'
+                git credentialsId: 'git-token', url: 'https://github.com/Nisha-Velmurugan/deployment.git', branch: 'main'
             }
         }
 
@@ -41,18 +41,14 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'ssh-pass', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([string(credentialsId: 'ssh-pass', variable: 'SSH_PASSWORD')]) {
                     sh '''
-                    set -e
-                    sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@100.115.92.202 <<EOF
-                    cd ~/deployment
-                    docker-compose pull
-                    docker-compose up -d --remove-orphans
-                    EOF
+                    sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no user@your-server 'cd /path/to/deployment && docker-compose down && docker-compose up -d'
                     '''
                 }
             }
         }
+
     }
 
     post {
