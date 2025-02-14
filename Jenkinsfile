@@ -41,11 +41,9 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                withCredentials([string(credentialsId: 'ssh-pass', variable: 'SSH_PASSWORD')]) {
-                    sh '''
-                    sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no user@your-server 'cd /path/to/deployment && docker-compose down && docker-compose up -d'
-                    '''
-                }
+                sh '''
+                    ssh -o StrictHostKeyChecking=no nishavelmurugan7@100.115.92.202 'cd /home/nishavelmurugan7/deployment && docker-compose down && docker-compose up -d'
+                '''
             }
         }
 
