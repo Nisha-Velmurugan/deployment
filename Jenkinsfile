@@ -49,7 +49,7 @@ pipeline {
 
     post {
         failure {
-            mail to: 'nishavelmurugan7@example.com',
+            mail to: 'nishavelmurugan7@gmail.com',
                  subject: 'Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}',
                  body: 'Check Jenkins logs for details.'
         }
