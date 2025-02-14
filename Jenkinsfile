@@ -49,9 +49,7 @@ pipeline {
 
     post {
         failure {
-                550 5.1.1 <nishavelmurugan7@gmail.com>: Recipient address rejected: gmail.com
-                subject: 'Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}',
-                body: 'Check Jenkins logs for details.'
+            echo "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}. Check Jenkins logs for details."
         }
     }
 }
