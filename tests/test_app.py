@@ -1,13 +1,12 @@
 import pytest
-from app.main import create_app
+from app.main import app
 
 @pytest.fixture
 def client():
-    app = create_app()
-    app.config['TESTING'] = True
-    return app.test_client()
+    with app.test_client() as client:
+        yield client
 
 def test_home(client):
-    response = client.get('/')
+    response = client.get("/")
     assert response.status_code == 200
-    assert response.json == {"message": "Hello, This is Nisha Velmurugan!"}
+    assert response.data == b"Hello, This is Nisha Velmurugan!"
