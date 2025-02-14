@@ -41,11 +41,16 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                // Simulate a successful deployment
-                sh '''
-                echo "Simulating deployment..."
-                echo "Application deployed successfully!"
-                '''
+                sshagent(['ssh-key']) { 
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no nishavelmurugan7@100.115.92.202 <<EOF
+                        cd /home/nishavelmurugan7/deployment
+                        docker-compose down
+                        docker-compose pull
+                        docker-compose up -d
+                        EOF
+                    '''
+                }
             }
         }
     }
