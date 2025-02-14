@@ -2,45 +2,47 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('docker-creds')
-        IMAGE_NAME = "nisshaa/deployment"
+        IMAGE_NAME = "nishavelmurugan7/flask-app"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/Nisha-Velmurugan/deployment.git', branch: 'main'
+                git 'https://github.com/nishavelmurugan7/flask-app.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                sh 'docker run --rm -e PYTHONPATH=/app -w /app $IMAGE_NAME:latest pytest tests/'
+                sh 'docker run --rm $IMAGE_NAME pytest'
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Image to Docker Hub') {
             steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                sh 'docker push $IMAGE_NAME:latest'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                    sh 'docker push $IMAGE_NAME'
+                }
             }
         }
 
         stage('Deploy Application') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'ssh-password', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([string(credentialsId: 'ssh_pass', variable: 'PASS')]) {
                     sh '''
-                    sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@100.115.92.202 <<EOF
-                    cd ~/deployment
-                    docker-compose pull
-                    docker-compose up -d --remove-orphans
-                    EOF
+                        sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no nishavelmurugan7@100.115.92.202 << 'EOF'
+                        docker pull $IMAGE_NAME
+                        docker stop flask-app || true
+                        docker rm flask-app || true
+                        docker run -d --name flask-app -p 5000:5000 $IMAGE_NAME
+                        EOF
                     '''
                 }
             }
@@ -48,8 +50,11 @@ pipeline {
     }
 
     post {
+        success {
+            echo 'Deployment Successful!'
+        }
         failure {
-            echo "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}. Check Jenkins logs for details."
+            echo 'Pipeline Failed!'
         }
     }
 }
