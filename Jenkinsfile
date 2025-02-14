@@ -41,7 +41,7 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'ssh-password', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'ssh-pass', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh '''
                     set -e
                     sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@100.115.92.202 <<EOF
