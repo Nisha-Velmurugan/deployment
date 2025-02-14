@@ -36,7 +36,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'ssh-password', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh '''
-                    sshpass -p "$PASS" ssh $USER@192.168.1.100 '
+                    sshpass -p "$PASS" ssh nishavelmurugan7@100.115.92.202 '
                     cd ~/deployment &&
                     docker-compose pull &&
                     docker-compose up -d --remove-orphans
